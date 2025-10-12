@@ -9,24 +9,30 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import Link from "next/link";
-import { Home, TvMinimalPlay } from "lucide-react";
+import { Activity, Home, TvMinimalPlay } from "lucide-react";
+import { ROUTES } from "@/lib/constants";
 
 const items = [
   {
     title: "Home",
-    url: "/",
+    url: ROUTES.home,
     icon: Home,
   },
   {
     title: "Predict",
-    url: "/predict",
+    url: ROUTES.predict,
     icon: TvMinimalPlay,
+  },
+  {
+    title: "Activity",
+    url: ROUTES.activity,
+    icon: Activity,
   },
 ];
 
 export default function AppSidebar() {
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" variant="floating">
       {/* Scrollable content goes here */}
       <SidebarContent>
         <SidebarGroup>
