@@ -18,7 +18,7 @@ export default function Home() {
         </p>
         <Separator className="w-full" />
         <Link
-          href={ROUTES.predict}
+          href={ROUTES.emotionDetection}
           className="flex items-center justify-center gap-1 mt-8 bg-muted p-2 rounded-md outline-1 shadow-sm hover:bg-accent hover:text-accent-foreground transition"
         >
           <span>Get Started</span>

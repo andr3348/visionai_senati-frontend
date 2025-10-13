@@ -1,5 +1,5 @@
 export const ROUTES = {
     home: '/',
-    predict: '/predict',
-    activity: '/activity',
+    emotionDetection: '/emotion-detection',
+    analytics: '/analytics',
 };

@@ -9,7 +9,7 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import Link from "next/link";
-import { Activity, Home, TvMinimalPlay } from "lucide-react";
+import { Activity, Home, ScanFace } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 
 const items = [
@@ -19,13 +19,13 @@ const items = [
     icon: Home,
   },
   {
-    title: "Predict",
-    url: ROUTES.predict,
-    icon: TvMinimalPlay,
+    title: "Emotion Detection",
+    url: ROUTES.emotionDetection,
+    icon: ScanFace,
   },
   {
-    title: "Activity",
-    url: ROUTES.activity,
+    title: "Analytics",
+    url: ROUTES.analytics,
     icon: Activity,
   },
 ];
