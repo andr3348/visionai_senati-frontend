@@ -23,6 +23,8 @@ const EmotionDetection = () => {
       // Connect the camera stream to the video element
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        setStream(stream);
+        setIsStreaming(true);
       }
     } catch (error) {
       console.error("Error accessing the camera:", error);
