@@ -92,9 +92,9 @@ export default function WebcamCapture({
       }
     }
 
-    // Set canvas size to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    // Set canvas size to match requested video dimensions (640x480)
+    canvas.width = 640;
+    canvas.height = 480;
 
     // draw current video frame to canvas
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
