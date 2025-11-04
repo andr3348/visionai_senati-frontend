@@ -1,15 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "./ui/button";
 import { AlertCircle, Camera, CameraOff } from "lucide-react";
+import { useFaceDetection } from "@/hooks/use-face-detection";
 
 interface WebcamCaptureProps {
-  onFrame?: (imageData: string) => void; // Callback to receive captured frame data
-  captureInterval?: number; // Interval in milliseconds to capture frames
+  onFrame?: (imageData: string) => void;
+  captureInterval?: number;
+  isProcessing?: boolean; // Indicates if backend is processing a frame
 }
 
 export default function WebcamCapture({
   onFrame,
   captureInterval = 1000,
+  isProcessing = false,
 }: WebcamCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -18,6 +21,9 @@ export default function WebcamCapture({
   const [isStreaming, setIsStreaming] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
+  const [hasFace, setHasFace] = useState(false);
+
+  const { detectFace, isModelLoaded, isLoading: isModelLoading, error: modelError } = useFaceDetection();
 
   const startCamera = async () => {
     try {
@@ -66,7 +72,7 @@ export default function WebcamCapture({
     }
   };
 
-  const captureFrame = () => {
+  const captureFrame = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current || !onFrame) return;
 
     const video = videoRef.current;
@@ -75,8 +81,19 @@ export default function WebcamCapture({
 
     if (!context) return;
 
+    // Only detect face if model is loaded
+    if (isModelLoaded) {
+      const faceDetected = await detectFace(video);
+      setHasFace(faceDetected);
+
+      // Only capture and send frame if face is detected
+      if (!faceDetected) {
+        return;
+      }
+    }
+
     // Set canvas size to match video
-    canvas.width = video.videoHeight;
+    canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
     // draw current video frame to canvas
@@ -87,9 +104,9 @@ export default function WebcamCapture({
 
     // Send frame to parent component
     onFrame(imageData);
-  };
+  }, [onFrame, isModelLoaded, detectFace]);
 
-  const startFrameCapture = () => {
+  const startFrameCapture = useCallback(() => {
     // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -97,9 +114,9 @@ export default function WebcamCapture({
 
     // Capture frames at specified interval
     intervalRef.current = setInterval(() => {
-      captureFrame();
+      void captureFrame();
     }, captureInterval);
-  };
+  }, [captureInterval, captureFrame]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -145,6 +162,59 @@ export default function WebcamCapture({
         {!isStreaming && (
           <div className="absolute inset-0 flex items-center justify-center">
             <Camera className="size-16 text-slate-300" />
+          </div>
+        )}
+
+        {/* Status Indicators */}
+        {isStreaming && (
+          <div className="absolute top-4 right-4 flex flex-col gap-2">
+            {/* Recording Status */}
+            <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-white text-xs font-medium">
+                Recording
+              </span>
+            </div>
+
+            {/* Model Loading Status */}
+            {isModelLoading && (
+              <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                <span className="text-white text-xs font-medium">
+                  Loading AI Model...
+                </span>
+              </div>
+            )}
+
+            {/* Face Detection Status */}
+            {isModelLoaded && (
+              <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${hasFace ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                <span className="text-white text-xs font-medium">
+                  {hasFace ? 'Face Detected' : 'No Face'}
+                </span>
+              </div>
+            )}
+
+            {/* Processing Status */}
+            {isProcessing && (
+              <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                <span className="text-white text-xs font-medium">
+                  Processing...
+                </span>
+              </div>
+            )}
+
+            {/* Model Error */}
+            {modelError && (
+              <div className="bg-red-500/80 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
+                <AlertCircle className="size-3 text-white" />
+                <span className="text-white text-xs font-medium">
+                  Face Detection Error
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
