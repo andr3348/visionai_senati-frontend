@@ -1,6 +1,6 @@
 import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/lib/constants";
-import { Eye, Play } from "lucide-react";
+import { ArrowUpRight, Eye } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
@@ -19,10 +19,10 @@ export default function Home() {
         <Separator className="w-full" />
         <Link
           href={ROUTES.emotionDetection}
-          className="flex items-center justify-center gap-1 mt-8 bg-muted p-2 rounded-md outline-1 shadow-sm hover:bg-accent hover:text-accent-foreground transition"
+          className="flex items-center justify-center gap-1 mt-8 underline hover:text-accent-foreground transition"
         >
-          <span>Get Started</span>
-          <Play className="size-4" />
+          Get Started
+          <ArrowUpRight className="size-4" />
         </Link>
       </div>
     </div>
