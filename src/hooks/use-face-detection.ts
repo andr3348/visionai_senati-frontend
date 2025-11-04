@@ -1,4 +1,3 @@
-import * as faceapi from "face-api.js";
 import { useEffect, useState, useCallback } from "react";
 
 interface UseFaceDetectionReturn {
@@ -14,10 +13,20 @@ export const useFaceDetection = (): UseFaceDetectionReturn => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
     const loadModels = async () => {
       try {
         setIsLoading(true);
         setError(null);
+        
+        // Dynamically import face-api only on client side
+        const faceapi = await import("@vladmandic/face-api");
+        
+        // Import and initialize TensorFlow backend
+        const tf = await import("@tensorflow/tfjs-core");
+        await tf.ready();
         
         // load only the tiny face detector for performance
         await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
@@ -38,9 +47,12 @@ export const useFaceDetection = (): UseFaceDetectionReturn => {
 
   const detectFace = useCallback(
     async (video: HTMLVideoElement): Promise<boolean> => {
-      if (!isModelLoaded || !video) return false;
+      if (!isModelLoaded || !video || typeof window === 'undefined') return false;
 
       try {
+        // Dynamically import face-api
+        const faceapi = await import("@vladmandic/face-api");
+        
         const detection = await faceapi.detectSingleFace(
           video,
           new faceapi.TinyFaceDetectorOptions({
