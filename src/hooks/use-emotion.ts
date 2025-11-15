@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useWebSocket } from './use-websocket';
-import { WS_CONFIG } from '@/lib/constants';
-import type { WebSocketMessage, EmotionPrediction, FrameData } from '@/types/emotion';
+import type { WebSocketMessage, EmotionPrediction } from '@/types/emotion';
+
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'wss://58g786gw-8000.brs.devtunnels.ms';
 
 interface UseEmotionReturn {
   prediction: EmotionPrediction | null;
@@ -10,88 +11,98 @@ interface UseEmotionReturn {
   isConnecting: boolean;
   error: string | null;
   sendFrame: (imageData: string) => void;
+  resetPrediction: () => void;
   reconnectionAttempt: number;
+  processingTimeMs: number | null;
+  modelVersion: string | null;
 }
 
 export const useEmotion = (): UseEmotionReturn => {
   const [prediction, setPrediction] = useState<EmotionPrediction | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [reconnectionAttempt, setReconnectionAttempt] = useState(0);
+  const [processingTimeMs, setProcessingTimeMs] = useState<number | null>(null);
+  const [modelVersion, setModelVersion] = useState<string | null>(null);
 
-  // Handle incoming WebSocket messages
-  const handleMessage = useCallback((message: WebSocketMessage) => {
-    if (!message) return;
+  const handleMessage = useCallback((data: WebSocketMessage) => {
+    console.log('Received WebSocket message:', data);
 
-    switch (message.type) {
-      case 'prediction':
-        // Backend sent emotion prediction
-        setPrediction(message.data as EmotionPrediction);
-        setIsProcessing(false);
-        break;
+    if (data.type === 'prediction' && data.status === 'success') {
+      // Update prediction
+      const newPrediction: EmotionPrediction = {
+        emotion_name: data.emotion_name || 'unknown',
+        confidence: data.confidence || 0,
+        model_version_tag: data.model_version_tag || 'unknown',
+        processing_time_ms: data.processing_time_ms || 0,
+        timestamp: data.timestamp || new Date().toISOString(),
+      };
 
-      case 'status':
-        // Backend status update (e.g., 'processing', 'idle')
-        const status = String(message.data);
-        setIsProcessing(status === 'processing');
-        break;
-
-      case 'error':
-        // Backend error occurred
-        console.error('Backend error:', message.data);
-        setIsProcessing(false);
-        break;
-
-      default:
-        console.warn('Unknown message type:', message);
+      setPrediction(newPrediction);
+      setProcessingTimeMs(data.processing_time_ms || null);
+      setModelVersion(data.model_version_tag || null);
+      setIsProcessing(false);
+    } else if (data.type === 'error' || data.status === 'error') {
+      // Backend handles face detection - may return 'no_face_detected' or other errors
+      console.error('Backend error:', data.message || 'Unknown error');
+      setIsProcessing(false);
     }
   }, []);
 
-  // Handle WebSocket errors
-  const handleError = useCallback((error: Event) => {
-    console.error('WebSocket error:', error);
+  const handleError = useCallback((event: Event) => {
+    console.error('WebSocket error:', event);
     setIsProcessing(false);
   }, []);
 
   const { sendMessage, isConnected, isConnecting, error } = useWebSocket<WebSocketMessage>({
-    url: WS_CONFIG.url,
+    url: WS_URL,
     onMessage: handleMessage,
     onError: handleError,
-    reconnectInterval: WS_CONFIG.reconnectInterval,
-    maxReconnectAttempts: WS_CONFIG.maxReconnectAttempts,
+    reconnectInterval: 3000,
+    maxReconnectAttempts: 5,
   });
 
   // Track reconnection attempts
-  useState(() => {
-    if (!isConnected && !isConnecting && error) {
+  useEffect(() => {
+    if (isConnecting && !isConnected) {
       setReconnectionAttempt((prev) => prev + 1);
     } else if (isConnected) {
       setReconnectionAttempt(0);
     }
-  });
+  }, [isConnecting, isConnected]);
 
-  // Send frame to backend
   const sendFrame = useCallback(
     (imageData: string) => {
-      // Only send if connected and not currently processing
-      if (!isConnected || isProcessing) {
+      if (!isConnected) {
+        console.warn('Cannot send frame: WebSocket not connected');
         return;
       }
 
-      const frameData: FrameData = {
-        image: imageData,
-        timestamp: Date.now(),
-      };
+      if (isProcessing) {
+        console.warn('Cannot send frame: Previous frame still processing');
+        return;
+      }
 
-      const payload = {
-        type: 'frame' as const,
-        data: frameData,
-      };
+      // Remove the data URL prefix if present
+      const base64Image = imageData.replace(/^data:image\/\w+;base64,/, '');
 
-      sendMessage(payload);
+      // Send frame with the command structure
+      sendMessage({
+        command: 'predict',
+        image: base64Image,
+      });
+
       setIsProcessing(true);
+      console.log('Frame sent to backend');
     },
-    [isConnected, isProcessing, sendMessage]
+    [sendMessage, isConnected, isProcessing]
   );
+
+  const resetPrediction = useCallback(() => {
+    setPrediction(null);
+    setIsProcessing(false);
+    setProcessingTimeMs(null);
+    setModelVersion(null);
+  }, []);
 
   return {
     prediction,
@@ -100,6 +111,9 @@ export const useEmotion = (): UseEmotionReturn => {
     isConnecting,
     error,
     sendFrame,
+    resetPrediction,
     reconnectionAttempt,
+    processingTimeMs,
+    modelVersion,
   };
 };

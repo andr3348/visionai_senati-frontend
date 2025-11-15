@@ -1,29 +1,36 @@
 export interface EmotionPrediction {
-  emotion: string;
+  emotion_name: string;
   confidence: number;
-  timestamp: number;
+  model_version_tag: string;
+  processing_time_ms: number;
+  timestamp: string;
 }
 
 export interface WebSocketMessage {
   type: 'prediction' | 'error' | 'status';
-  data: EmotionPrediction | string;
+  status: 'success' | 'error';
+  emotion_name?: string;
+  confidence?: number;
+  model_version_tag?: string;
+  processing_time_ms?: number;
+  timestamp?: string;
+  message?: string; // For error messages
 }
 
 export interface FrameData {
+  command: 'predict';
   image: string; // base64 encoded image
-  timestamp: number;
 }
 
 // Emotion labels that the model can predict
 export const EMOTION_LABELS = [
-  'angry',
-  'disgust',
-  'fear',
-  'happy',
-  'neutral',
-  'sad',
-  'surprise',
+  "angry",
+  "disgust",
+  "fear",
+  "happy",
+  "neutral",
+  "sad",
+  "surprise",
 ] as const;
 
-export type EmotionLabel = typeof EMOTION_LABELS[number];
-
+export type EmotionLabel = (typeof EMOTION_LABELS)[number];

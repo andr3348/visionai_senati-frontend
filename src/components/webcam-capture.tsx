@@ -1,18 +1,19 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "./ui/button";
 import { AlertCircle, Camera, CameraOff } from "lucide-react";
-import { useFaceDetection } from "@/hooks/use-face-detection";
 
 interface WebcamCaptureProps {
   onFrame?: (imageData: string) => void;
   captureInterval?: number;
   isProcessing?: boolean; // Indicates if backend is processing a frame
+  onStop?: () => void; // Called when camera is stopped
 }
 
 export default function WebcamCapture({
   onFrame,
   captureInterval = 1000,
   isProcessing = false,
+  onStop,
 }: WebcamCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -21,9 +22,6 @@ export default function WebcamCapture({
   const [isStreaming, setIsStreaming] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
-  const [hasFace, setHasFace] = useState(false);
-
-  const { detectFace, isModelLoaded, isLoading: isModelLoading, error: modelError } = useFaceDetection();
 
   const startCamera = async () => {
     try {
@@ -42,10 +40,13 @@ export default function WebcamCapture({
         setStream(mediaStream);
         setIsStreaming(true);
 
-        // Start capturing frames if callback is provided
-        if (onFrame) {
-          startFrameCapture();
-        }
+        // Wait for video to be ready before starting frame capture
+        videoRef.current.onloadedmetadata = () => {
+          // Start capturing frames if callback is provided
+          if (onFrame) {
+            startFrameCapture();
+          }
+        };
       }
     } catch (error) {
       const errorMessage = "Could not access camera";
@@ -67,6 +68,11 @@ export default function WebcamCapture({
       setIsStreaming(false);
     }
 
+    // Reset prediction state
+    if (onStop) {
+      onStop();
+    }
+
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
@@ -81,30 +87,19 @@ export default function WebcamCapture({
 
     if (!context) return;
 
-    // Only detect face if model is loaded
-    if (isModelLoaded) {
-      const faceDetected = await detectFace(video);
-      setHasFace(faceDetected);
-
-      // Only capture and send frame if face is detected
-      if (!faceDetected) {
-        return;
-      }
-    }
-
-    // Set canvas size to match requested video dimensions (640x480)
+    // Set canvas size to match video dimensions (640x480)
     canvas.width = 640;
     canvas.height = 480;
 
-    // draw current video frame to canvas
+    // Draw current video frame to canvas
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // Convert canvas to base64 image data
     const imageData = canvas.toDataURL("image/jpeg", 0.8);
 
-    // Send frame to parent component
+    // Send frame to parent component (backend will handle face detection)
     onFrame(imageData);
-  }, [onFrame, isModelLoaded, detectFace]);
+  }, [onFrame]);
 
   const startFrameCapture = useCallback(() => {
     // Clear any existing interval
@@ -176,42 +171,12 @@ export default function WebcamCapture({
               </span>
             </div>
 
-            {/* Model Loading Status */}
-            {isModelLoading && (
-              <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                <span className="text-white text-xs font-medium">
-                  Loading AI Model...
-                </span>
-              </div>
-            )}
-
-            {/* Face Detection Status */}
-            {isModelLoaded && (
-              <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${hasFace ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                <span className="text-white text-xs font-medium">
-                  {hasFace ? 'Face Detected' : 'No Face'}
-                </span>
-              </div>
-            )}
-
             {/* Processing Status */}
             {isProcessing && (
               <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                 <span className="text-white text-xs font-medium">
                   Processing...
-                </span>
-              </div>
-            )}
-
-            {/* Model Error */}
-            {modelError && (
-              <div className="bg-red-500/80 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
-                <AlertCircle className="size-3 text-white" />
-                <span className="text-white text-xs font-medium">
-                  Face Detection Error
                 </span>
               </div>
             )}
