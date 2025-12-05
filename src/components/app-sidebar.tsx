@@ -28,6 +28,8 @@ import { useAuth } from "@/contexts/auth.context";
 import LoginModal from "./auth/login-modal";
 import { Button } from "./ui/button";
 import RegisterModal from "./auth/signin-modal";
+import ProfileModal from "./profile-modal";
+import SettingsModal from "./settings-modal";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
@@ -76,6 +78,8 @@ export default function AppSidebar() {
   const { open, isMobile, toggleSidebar } = useSidebar();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -207,8 +211,12 @@ export default function AppSidebar() {
                   >
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuGroup>
-                      <DropdownMenuItem>Profile</DropdownMenuItem>
-                      <DropdownMenuItem>Settings</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setShowProfileModal(true)}>
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setShowSettingsModal(true)}>
+                        Settings
+                      </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
@@ -232,6 +240,14 @@ export default function AppSidebar() {
         isOpen={showRegisterModal}
         onClose={() => setShowRegisterModal(false)}
         switchToLogin={() => setShowLoginModal(true)}
+      />
+      <ProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+      />
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
       />
     </>
   );

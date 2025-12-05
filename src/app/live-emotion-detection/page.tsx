@@ -71,7 +71,7 @@ const EmotionDetection = () => {
 
         {/* Predictions Section */}
         <div className="w-full lg:w-80 min-h-[200px] lg:min-h-0">
-          <div className="bg-slate-50 w-full h-full rounded-lg border border-slate-200 flex flex-col p-6 gap-4">
+          <div className="bg-card border-border w-full h-full rounded-lg border flex flex-col p-6 gap-4">
             {/* Prediction Display */}
             {prediction ? (
               <div className="flex-1 flex flex-col justify-center text-center space-y-4">
@@ -82,18 +82,18 @@ const EmotionDetection = () => {
 
                 {/* Emotion Name */}
                 <div className="space-y-1">
-                  <h2 className="text-3xl font-bold text-slate-800 capitalize">
+                  <h2 className="text-3xl font-bold capitalize">
                     {prediction.emotion_name}
                   </h2>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-muted-foreground">
                     Confidence: {(prediction.confidence * 100).toFixed(1)}%
                   </p>
                 </div>
 
                 {/* Confidence Bar */}
-                <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-full rounded-full transition-all duration-500 ease-out"
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400 h-full rounded-full transition-all duration-500 ease-out"
                     style={{
                       width: `${prediction.confidence * 100}%`,
                     }}
@@ -101,11 +101,11 @@ const EmotionDetection = () => {
                 </div>
 
                 {/* Metadata */}
-                <div className="pt-2 space-y-1.5 text-xs text-slate-500">
+                <div className="pt-2 space-y-1.5 text-xs text-muted-foreground">
                   {processingTimeMs !== null && (
                     <div className="flex justify-between items-center">
                       <span>Processing Time:</span>
-                      <span className="font-mono font-semibold text-slate-700">
+                      <span className="font-mono font-semibold">
                         {processingTimeMs}ms
                       </span>
                     </div>
@@ -113,14 +113,14 @@ const EmotionDetection = () => {
                   {modelVersion && (
                     <div className="flex justify-between items-center">
                       <span>Model Version:</span>
-                      <span className="font-mono font-semibold text-slate-700">
+                      <span className="font-mono font-semibold">
                         {modelVersion}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between items-center">
                     <span>Last Updated:</span>
-                    <span className="font-mono text-slate-600">
+                    <span className="font-mono">
                       {new Date(prediction.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
@@ -128,12 +128,12 @@ const EmotionDetection = () => {
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="text-slate-400 text-5xl">🤔</div>
+                <div className="text-muted-foreground text-5xl">🤔</div>
                 <div>
-                  <p className="text-slate-600 font-medium">
+                  <p className="text-foreground font-medium">
                     Waiting for prediction...
                   </p>
-                  <p className="text-sm text-slate-400 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     Position your face in front of the camera
                   </p>
                 </div>
@@ -141,7 +141,7 @@ const EmotionDetection = () => {
             )}
 
             {/* Status Info */}
-            <div className="pt-4 border-t border-slate-200 w-full">
+            <div className="pt-4 border-t border-border w-full">
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex items-center gap-2 justify-center">
                   <div
@@ -149,7 +149,7 @@ const EmotionDetection = () => {
                       isConnected ? "bg-green-500" : "bg-red-500"
                     }`}
                   />
-                  <span className="text-slate-600 font-medium">
+                  <span className="text-muted-foreground font-medium">
                     {isConnected ? "Connected" : "Disconnected"}
                   </span>
                 </div>
@@ -158,10 +158,10 @@ const EmotionDetection = () => {
                     className={`w-2 h-2 rounded-full ${
                       isProcessing
                         ? "bg-blue-500 animate-pulse"
-                        : "bg-slate-300"
+                        : "bg-muted"
                     }`}
                   />
-                  <span className="text-slate-600 font-medium">
+                  <span className="text-muted-foreground font-medium">
                     {isProcessing ? "Processing" : "Ready"}
                   </span>
                 </div>

@@ -128,7 +128,7 @@ export default function WebcamCapture({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 w-full h-full max-w-[640px] max-h-[480px] aspect-video">
-        <div className="bg-red-50 w-full h-full rounded-lg border border-red-200 flex flex-col items-center justify-center p-6 gap-4">
+        <div className="bg-red-50 dark:bg-red-950 w-full h-full rounded-lg border border-red-200 dark:border-red-800 flex flex-col items-center justify-center p-6 gap-4">
           <AlertCircle className="size-12 text-red-500" />
           <p className="text-red-600 text-center">{error}</p>
           <Button onClick={startCamera} variant="outline" className="mt-2">
@@ -142,7 +142,7 @@ export default function WebcamCapture({
   return (
     <div className="flex flex-col items-center gap-4">
       {/* Video container */}
-      <div className="bg-slate-100 outline w-full h-full max-w-[640px] max-h-[480px] aspect-video rounded-lg overflow-hidden relative">
+      <div className="bg-card border border-border outline w-full h-full max-w-[640px] max-h-[480px] aspect-video rounded-lg overflow-hidden relative">
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
@@ -156,7 +156,7 @@ export default function WebcamCapture({
         {/* Placeholder when camera is off */}
         {!isStreaming && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Camera className="size-16 text-slate-300" />
+            <Camera className="size-16 text-muted-foreground opacity-30" />
           </div>
         )}
 
@@ -186,14 +186,14 @@ export default function WebcamCapture({
 
       {/* Controls */}
       {!isStreaming ? (
-        <Button onClick={startCamera} className="flex items-center gap-2">
+        <Button onClick={startCamera} variant="outline" className="flex items-center gap-2">
           <Camera className="size-4" />
           Start Camera
         </Button>
       ) : (
         <Button
           onClick={stopCamera}
-          variant="destructive"
+          variant="outline"
           className="flex items-center gap-2"
         >
           <CameraOff className="size-4" />

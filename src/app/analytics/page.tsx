@@ -74,13 +74,13 @@ export default function AnalyticsPage() {
   };
 
   const emotionsChartConfig = {
-    happy: { label: "Happy", color: "hsl(142 76% 36%)" },
-    sad: { label: "Sad", color: "hsl(221 83% 53%)" },
-    angry: { label: "Angry", color: "hsl(0 84% 60%)" },
-    neutral: { label: "Neutral", color: "hsl(215 20% 65%)" },
-    surprise: { label: "Surprise", color: "hsl(48 96% 53%)" },
-    fear: { label: "Fear", color: "hsl(280 67% 55%)" },
-    disgust: { label: "Disgust", color: "hsl(24 100% 50%)" },
+    happy: { label: "Happy", color: "hsl(var(--emotion-happy))" },
+    sad: { label: "Sad", color: "hsl(var(--emotion-sad))" },
+    angry: { label: "Angry", color: "hsl(var(--emotion-angry))" },
+    neutral: { label: "Neutral", color: "hsl(var(--emotion-neutral))" },
+    surprise: { label: "Surprise", color: "hsl(var(--emotion-surprise))" },
+    fear: { label: "Fear", color: "hsl(var(--emotion-fear))" },
+    disgust: { label: "Disgust", color: "hsl(var(--emotion-disgust))" },
   } as Record<string, { label: string; color: string }>;
 
   if (authLoading) {

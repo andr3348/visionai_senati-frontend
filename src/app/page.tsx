@@ -91,7 +91,7 @@ export default function Home() {
   return (
     <div className="relative flex flex-col items-center h-full justify-center overflow-hidden">
       {/* Background Chart */}
-      <div className="absolute inset-0 w-full h-full opacity-10 pointer-events-none">
+      <div className="absolute inset-0 w-full h-full opacity-10 dark:opacity-20 pointer-events-none">
         <ChartContainer config={chartConfig} className="w-full h-full">
           <AreaChart
             data={chartData}

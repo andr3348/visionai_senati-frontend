@@ -17,7 +17,7 @@ export default function ConnectionStatus({
 }: ConnectionStatusProps) {
   if (isConnected) {
     return (
-      <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg border border-green-200">
+      <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg border border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800">
         <CheckCircle className="size-4" />
         <span className="text-sm font-medium">Connected to Backend</span>
       </div>
@@ -26,7 +26,7 @@ export default function ConnectionStatus({
 
   if (isConnecting) {
     return (
-      <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+      <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800">
         <Loader2 className="size-4 animate-spin" />
         <span className="text-sm font-medium">Connecting to Backend...</span>
       </div>
@@ -37,7 +37,7 @@ export default function ConnectionStatus({
     const isMaxAttemptsReached = reconnectionAttempt >= maxAttempts;
 
     return (
-      <div className="flex flex-col gap-2 text-red-600 bg-red-50 px-4 py-3 rounded-lg border border-red-200">
+      <div className="flex flex-col gap-2 text-red-600 bg-red-50 px-4 py-3 rounded-lg border border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800">
         <div className="flex items-center gap-2">
           {isMaxAttemptsReached ? (
             <WifiOff className="size-4" />
@@ -58,9 +58,9 @@ export default function ConnectionStatus({
         )}
 
         {!isMaxAttemptsReached && (
-          <div className="w-full bg-red-200 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-red-200 dark:bg-red-900 rounded-full h-1.5 overflow-hidden">
             <div
-              className="bg-red-500 h-full transition-all duration-300 animate-pulse"
+              className="bg-red-500 dark:bg-red-400 h-full transition-all duration-300 animate-pulse"
               style={{
                 width: `${(reconnectionAttempt / maxAttempts) * 100}%`,
               }}
