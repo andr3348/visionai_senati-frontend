@@ -6,6 +6,14 @@ export interface EmotionPrediction {
   timestamp: string;
 }
 
+// Response from /api/v1/predict endpoint (file upload)
+export interface PredictionResponse {
+  emotion_name: string;
+  confidence: number;
+  model_version_tag: string;
+  processing_time_ms: number;
+}
+
 export interface WebSocketMessage {
   type: 'prediction' | 'error' | 'status';
   status: 'success' | 'error';

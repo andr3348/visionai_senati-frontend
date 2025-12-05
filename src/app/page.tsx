@@ -148,7 +148,7 @@ export default function Home() {
         </p>
         <Separator className="w-full" />
         <Link
-          href={ROUTES.emotionDetection}
+          href={ROUTES.liveEmotionDetection}
           className="flex items-center justify-center gap-1 mt-8 underline hover:text-accent-foreground transition"
         >
           Get Started

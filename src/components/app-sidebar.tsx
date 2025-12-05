@@ -10,11 +10,19 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   useSidebar,
 } from "./ui/sidebar";
 import Link from "next/link";
-import { Activity, Home, ScanFace, UserIcon } from "lucide-react";
+import { Activity, Home, ScanFace, UserIcon, ChevronDown, Upload, icons, Camera } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "./ui/collapsible";
 import { useAuth } from "@/contexts/auth.context";
 import LoginModal from "./auth/login-modal";
 import { Button } from "./ui/button";
@@ -40,9 +48,20 @@ const items = [
     icon: Home,
   },
   {
-    title: "Emotion Detection",
-    url: ROUTES.emotionDetection,
+    title: "Predictions",
     icon: ScanFace,
+    items: [
+      {
+        title: "Live Emotion Detection",
+        url: ROUTES.liveEmotionDetection,
+        icon: Camera,
+      },
+      {
+        title: "Emotion Detection",
+        url: ROUTES.emotionDetection,
+        icon: Upload,
+      },
+    ],
   },
   {
     title: "Analytics",
@@ -72,16 +91,55 @@ export default function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <Link href={item.url}>
-                        <item.icon />
-                        {item.title}
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {items.map((item) => {
+                  // If item has nested items, render as collapsible
+                  if ("items" in item && item.items) {
+                    return (
+                      <Collapsible
+                        key={item.title}
+                        asChild
+                        defaultOpen
+                        className="group/collapsible"
+                      >
+                        <SidebarMenuItem>
+                          <CollapsibleTrigger asChild>
+                            <SidebarMenuButton>
+                              <item.icon />
+                              <span>{item.title}</span>
+                              <ChevronDown className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                            </SidebarMenuButton>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <SidebarMenuSub>
+                              {item.items.map((subItem) => (
+                                <SidebarMenuSubItem key={subItem.title}>
+                                  <SidebarMenuSubButton asChild>
+                                    <Link href={subItem.url}>
+                                      {subItem.icon && <subItem.icon />}
+                                      <span>{subItem.title}</span>
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        </SidebarMenuItem>
+                      </Collapsible>
+                    );
+                  }
+
+                  // Regular item without nesting
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <Link href={item.url!}>
+                          <item.icon />
+                          {item.title}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useWebSocket } from './use-websocket';
 import type { WebSocketMessage, EmotionPrediction } from '@/types/emotion';
+import { getAccessToken } from '@/lib/api-client';
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'wss://58g786gw-8000.brs.devtunnels.ms';
 
@@ -82,13 +83,21 @@ export const useEmotion = (): UseEmotionReturn => {
         return;
       }
 
+      // Get access token for authentication
+      const token = getAccessToken();
+      if (!token) {
+        console.error('Cannot send frame: No authentication token');
+        return;
+      }
+
       // Remove the data URL prefix if present
       const base64Image = imageData.replace(/^data:image\/\w+;base64,/, '');
 
-      // Send frame with the command structure
+      // Send frame with the command structure and token
       sendMessage({
         command: 'predict',
         image: base64Image,
+        token: token,
       });
 
       setIsProcessing(true);
