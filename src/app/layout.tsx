@@ -4,6 +4,7 @@ import "./globals.css";
 import QueryProvider from "../providers/QueryProvider";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/app-sidebar";
+import { AuthProvider } from "@/contexts/auth.context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,18 +31,20 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SidebarProvider defaultOpen={false}>
-          <AppSidebar />
-          <QueryProvider>
-            <div className="flex flex-col min-h-screen w-full">
-              <header className="flex items-center gap-4 px-4 py-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <SidebarTrigger />
-                {/* Path text will go here */}
-              </header>
-              <main className="flex-1 overflow-auto">{children}</main>
-            </div>
-          </QueryProvider>
-        </SidebarProvider>
+        <AuthProvider> {/* AuthProvide to check current authenticated user status */}
+          <SidebarProvider defaultOpen={true}>
+            <AppSidebar />
+            <QueryProvider>
+              <div className="flex flex-col min-h-screen w-full">
+                <header className="flex items-center gap-4 px-4 py-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                  <SidebarTrigger />
+                  {/* Path text will go here */}
+                </header>
+                <main className="flex-1 overflow-auto">{children}</main>
+              </div>
+            </QueryProvider>
+          </SidebarProvider>
+        </AuthProvider>
       </body>
     </html>
   );
