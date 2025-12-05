@@ -53,7 +53,7 @@ const items = [
 
 export default function AppSidebar() {
   const { user, isAuthenticated, logout, isLoading } = useAuth();
-  const { open } = useSidebar();
+  const { open, isMobile } = useSidebar();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
@@ -117,31 +117,32 @@ export default function AppSidebar() {
                   </Button>
                 </div>
               ) : isAuthenticated ? (
-                <div className="flex items-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger className="w-full p-2 hover:bg-accent cursor-pointer rounded-md">
-                      <div className="flex items-center gap-2">
-                        <UserIcon className="size-4" />
-                        <span className="text-sm font-medium">
-                          {user?.username}
-                        </span>
-                      </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem>Profile</DropdownMenuItem>
-                        <DropdownMenuItem>Settings</DropdownMenuItem>
-                      </DropdownMenuGroup>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => logout()}>
-                          Logout
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton className="hover:cursor-pointer">
+                      <UserIcon />
+                      <span>{user?.username}</span>
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    className="w-56" 
+                    side={isMobile ? "top" : "right"} 
+                    align={isMobile ? "end" : "end"}
+                    sideOffset={8}
+                  >
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>Profile</DropdownMenuItem>
+                      <DropdownMenuItem>Settings</DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem onClick={() => logout()}>
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : null}
             </SidebarMenuItem>
           </SidebarMenu>
