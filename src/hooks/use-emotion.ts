@@ -16,6 +16,8 @@ interface UseEmotionReturn {
   reconnectionAttempt: number;
   processingTimeMs: number | null;
   modelVersion: string | null;
+  connect: () => void;
+  disconnect: () => void;
 }
 
 export const useEmotion = (): UseEmotionReturn => {
@@ -54,12 +56,13 @@ export const useEmotion = (): UseEmotionReturn => {
     setIsProcessing(false);
   }, []);
 
-  const { sendMessage, isConnected, isConnecting, error } = useWebSocket<WebSocketMessage>({
+  const { sendMessage, isConnected, isConnecting, error, connect, disconnect } = useWebSocket<WebSocketMessage>({
     url: WS_URL,
     onMessage: handleMessage,
     onError: handleError,
     reconnectInterval: 3000,
     maxReconnectAttempts: 5,
+    autoConnect: false,
   });
 
   // Track reconnection attempts
@@ -124,5 +127,7 @@ export const useEmotion = (): UseEmotionReturn => {
     reconnectionAttempt,
     processingTimeMs,
     modelVersion,
+    connect,
+    disconnect,
   };
 };

@@ -7,6 +7,8 @@ interface WebcamCaptureProps {
   captureInterval?: number;
   isProcessing?: boolean; // Indicates if backend is processing a frame
   onStop?: () => void; // Called when camera is stopped
+  onStart?: () => void; // Called when camera is started
+  isConnected?: boolean; // WebSocket connection status
 }
 
 export default function WebcamCapture({
@@ -14,6 +16,8 @@ export default function WebcamCapture({
   captureInterval = 1000,
   isProcessing = false,
   onStop,
+  onStart,
+  isConnected = true,
 }: WebcamCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -40,12 +44,15 @@ export default function WebcamCapture({
         setStream(mediaStream);
         setIsStreaming(true);
 
+        // Call onStart callback when camera starts
+        if (onStart) {
+          onStart();
+        }
+
         // Wait for video to be ready before starting frame capture
         videoRef.current.onloadedmetadata = () => {
-          // Start capturing frames if callback is provided
-          if (onFrame) {
-            startFrameCapture();
-          }
+          // Frame capture will start when isConnected becomes true
+          // via the useEffect below
         };
       }
     } catch (error) {
@@ -112,6 +119,18 @@ export default function WebcamCapture({
       void captureFrame();
     }, captureInterval);
   }, [captureInterval, captureFrame]);
+
+  // Start/stop frame capture based on connection status
+  useEffect(() => {
+    if (isStreaming && isConnected && onFrame && videoRef.current?.readyState === 4) {
+      // Video is ready and WebSocket is connected, start capturing
+      startFrameCapture();
+    } else if (!isConnected && intervalRef.current) {
+      // WebSocket disconnected, stop capturing
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, [isStreaming, isConnected, onFrame, startFrameCapture]);
 
   // Cleanup on unmount
   useEffect(() => {

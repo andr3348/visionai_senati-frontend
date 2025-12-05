@@ -6,6 +6,7 @@ interface UseWebSocketOptions<T = unknown> {
   onError?: (error: Event) => void;
   reconnectInterval?: number;
   maxReconnectAttempts?: number;
+  autoConnect?: boolean;
 }
 
 interface UseWebSocketReturn {
@@ -13,6 +14,8 @@ interface UseWebSocketReturn {
   isConnected: boolean;
   isConnecting: boolean;
   error: string | null;
+  connect: () => void;
+  disconnect: () => void;
 }
 
 export const useWebSocket = <T = unknown>({
@@ -21,6 +24,7 @@ export const useWebSocket = <T = unknown>({
   onError,
   reconnectInterval = 3000,
   maxReconnectAttempts = 5,
+  autoConnect = true,
 }: UseWebSocketOptions<T>): UseWebSocketReturn => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -29,12 +33,14 @@ export const useWebSocket = <T = unknown>({
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const intentionalDisconnectRef = useRef(false);
 
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       return;
     }
 
+    intentionalDisconnectRef.current = false;
     setIsConnecting(true);
     setError(null);
 
@@ -69,8 +75,8 @@ export const useWebSocket = <T = unknown>({
         setIsConnected(false);
         setIsConnecting(false);
 
-        // Attempt to reconnect
-        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+        // Only attempt to reconnect if disconnect was not intentional
+        if (!intentionalDisconnectRef.current && reconnectAttemptsRef.current < maxReconnectAttempts) {
           reconnectAttemptsRef.current += 1;
           console.log(
             `Reconnecting... Attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts}`
@@ -78,6 +84,9 @@ export const useWebSocket = <T = unknown>({
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
           }, reconnectInterval);
+        } else if (intentionalDisconnectRef.current) {
+          console.log("Connection closed intentionally");
+          reconnectAttemptsRef.current = 0;
         } else {
           setError("Max reconnection attempts reached");
         }
@@ -90,6 +99,23 @@ export const useWebSocket = <T = unknown>({
     }
   }, [url, onMessage, onError, reconnectInterval, maxReconnectAttempts]);
 
+  const disconnect = useCallback(() => {
+    intentionalDisconnectRef.current = true;
+    reconnectAttemptsRef.current = 0;
+    
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = undefined;
+    }
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+    setIsConnected(false);
+    setIsConnecting(false);
+    setError(null);
+  }, []);
+
   const sendMessage = useCallback((data: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(data));
@@ -99,7 +125,9 @@ export const useWebSocket = <T = unknown>({
   }, []);
 
   useEffect(() => {
-    connect();
+    if (autoConnect) {
+      connect();
+    }
 
     return () => {
       if (reconnectTimeoutRef.current) {
@@ -109,12 +137,14 @@ export const useWebSocket = <T = unknown>({
         wsRef.current.close();
       }
     };
-  }, [connect]);
+  }, [connect, autoConnect]);
 
   return {
     sendMessage,
     isConnected,
     isConnecting,
     error,
+    connect,
+    disconnect,
   };
 };

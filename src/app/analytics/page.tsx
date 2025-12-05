@@ -45,24 +45,32 @@ export default function AnalyticsPage() {
     queryKey: ["userStats"],
     queryFn: () => statsService.getUserStats(),
     enabled: isAuthenticated,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const { data: activity, isLoading: activityLoading } = useQuery({
     queryKey: ["userActivity"],
     queryFn: () => statsService.getUserActivity(30),
     enabled: isAuthenticated,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const { data: emotions, isLoading: emotionsLoading } = useQuery({
     queryKey: ["userEmotions"],
     queryFn: () => statsService.getUserEmotions(),
     enabled: isAuthenticated,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const { data: recent, isLoading: recentLoading } = useQuery({
     queryKey: ["userRecent"],
     queryFn: () => statsService.getUserRecentPredictions(10),
     enabled: isAuthenticated,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   // Chart configs

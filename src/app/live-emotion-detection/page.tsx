@@ -22,6 +22,8 @@ const EmotionDetection = () => {
     reconnectionAttempt,
     processingTimeMs,
     modelVersion,
+    connect,
+    disconnect,
   } = useEmotion();
 
   if (authLoading) {
@@ -65,7 +67,12 @@ const EmotionDetection = () => {
             onFrame={sendFrame}
             captureInterval={CAPTURE_CONFIG.interval}
             isProcessing={isProcessing}
-            onStop={resetPrediction}
+            isConnected={isConnected}
+            onStart={connect}
+            onStop={() => {
+              disconnect();
+              resetPrediction();
+            }}
           />
         </div>
 
