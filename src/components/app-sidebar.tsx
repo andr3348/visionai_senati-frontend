@@ -10,6 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "./ui/sidebar";
 import Link from "next/link";
 import { Activity, Home, ScanFace, UserIcon } from "lucide-react";
@@ -29,6 +30,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Skeleton } from "./ui/skeleton";
+import { Spinner } from "./ui/spinner";
 
 const items = [
   {
@@ -50,6 +53,7 @@ const items = [
 
 export default function AppSidebar() {
   const { user, isAuthenticated, logout, isLoading } = useAuth();
+  const { open } = useSidebar();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
@@ -83,51 +87,64 @@ export default function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
-          {isLoading ? (
-            <div className="p-2">Loading...</div>
-          ) : !isAuthenticated ? (
-            <div className="flex flex-col gap-2 p-2">
-              <Button
-                onClick={() => setShowLoginModal(true)}
-                className="w-full"
-              >
-                Login
-              </Button>
-              <Button
-                onClick={() => setShowRegisterModal(true)}
-                variant="outline"
-                className="w-full"
-              >
-                Sign Up
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center">
-              <DropdownMenu>
-                <DropdownMenuTrigger className="w-full p-2 hover:bg-accent cursor-pointer rounded-md">
-                  <div className="flex items-center gap-2">
-                    <UserIcon className="size-4" />
-                    <span className="text-sm font-medium">
-                      {user?.username}
-                    </span>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              {isLoading ? (
+                !open ? (
+                  <div className="flex items-center justify-center p-2">
+                    <Spinner />
                   </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => logout()}>
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
+                ) : (
+                  <div className="flex items-center gap-2 p-2">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="h-4 w-24 rounded" />
+                  </div>
+                )
+              ) : !isAuthenticated && open ? (
+                <div className="flex flex-col gap-2 p-2">
+                  <Button
+                    onClick={() => setShowLoginModal(true)}
+                    className="w-full"
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    onClick={() => setShowRegisterModal(true)}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Sign Up
+                  </Button>
+                </div>
+              ) : isAuthenticated ? (
+                <div className="flex items-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="w-full p-2 hover:bg-accent cursor-pointer rounded-md">
+                      <div className="flex items-center gap-2">
+                        <UserIcon className="size-4" />
+                        <span className="text-sm font-medium">
+                          {user?.username}
+                        </span>
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem>Profile</DropdownMenuItem>
+                        <DropdownMenuItem>Settings</DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem onClick={() => logout()}>
+                          Logout
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : null}
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
       <LoginModal

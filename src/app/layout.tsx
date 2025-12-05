@@ -32,7 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider> {/* AuthProvide to check current authenticated user status */}
-          <SidebarProvider defaultOpen={false}>
+          <SidebarProvider defaultOpen={true}>
             <AppSidebar />
             <QueryProvider>
               <div className="flex flex-col min-h-screen w-full">
