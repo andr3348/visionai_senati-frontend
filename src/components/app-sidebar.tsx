@@ -7,6 +7,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -16,7 +17,7 @@ import {
   useSidebar,
 } from "./ui/sidebar";
 import Link from "next/link";
-import { Activity, Home, ScanFace, UserIcon, ChevronDown, Upload, icons, Camera } from "lucide-react";
+import { Activity, Home, ScanFace, UserIcon, ChevronDown, Upload, icons, Camera, X } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 import {
   Collapsible,
@@ -72,7 +73,7 @@ const items = [
 
 export default function AppSidebar() {
   const { user, isAuthenticated, logout, isLoading } = useAuth();
-  const { open, isMobile } = useSidebar();
+  const { open, isMobile, toggleSidebar } = useSidebar();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
@@ -86,6 +87,22 @@ export default function AppSidebar() {
   return (
     <>
       <Sidebar collapsible="icon" variant="floating">
+        {/* Mobile close button */}
+        {isMobile && (
+          <SidebarHeader>
+            <div className="flex items-center justify-between px-2 py-2">
+              <h2 className="text-lg font-semibold">Menu</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => toggleSidebar()}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </SidebarHeader>
+        )}
         {/* Scrollable content goes here */}
         <SidebarContent>
           <SidebarGroup>
