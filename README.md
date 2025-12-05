@@ -26,7 +26,7 @@ Real-time facial emotion detection system using Next.js and WebSocket communicat
    # Copy the example env file
    cp .env.example .env.local
    
-   # Edit .env.local and add your backend WebSocket URL
+   # Add a .env file and add your backend WebSocket URL
    # Example: NEXT_PUBLIC_WS_URL=wss://your-backend-url.com/ws/emotion
    ```
 
